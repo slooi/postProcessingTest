@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Post Processing</title>
+		<style>
+			canvas {
+				image-rendering: -moz-crisp-edges;
+				image-rendering: -webkit-crisp-edges;
+				image-rendering: pixelated;
+				border: 1px dashed grey;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<script type="shader" id="vsSource">
+			attribute vec2 a_Position;
+			attribute vec3 a_Color;
+			attribute vec2 a_TexCoord;
+			
+			varying vec3 v_Color;
+			varying vec2 v_TexCoord;
+
+			uniform float u_RadInv;
+
+			void main(){
+				v_Color = a_Color;
+				v_TexCoord = a_TexCoord;
+
+				gl_Position = vec4(a_Position,0,1);
+				gl_PointSize = 10.0;
+			}
+		</script>
+		<script type="shader" id="fsSource">
+			precision mediump float;
+
+			varying vec3 v_Color;
+			varying vec2 v_TexCoord;
+
+			uniform sampler2D u_Tex;
+			
+			void main(){
+				vec4 c = texture2D(u_Tex,v_TexCoord);
+				gl_FragColor = vec4(v_Color,1)+c;
+			}
+		</script>
+		<script src="webgl.js"></script>
+		<!-- <script src="main.js"></script> -->
+	</body>
+
+</html>
