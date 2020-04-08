@@ -58,31 +58,7 @@ let data = [
 // ORIGINAL DATA
 // Buffer
 const dataBuffer = gl.createBuffer()
-gl.bindBuffer(gl.ARRAY_BUFFER,dataBuffer)
-gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW)
-
-// pointer
-gl.vertexAttribPointer(
-	attribLocations.a_Position,
-	2,
-	gl.FLOAT,
-	0,
-	5*Float32Array.BYTES_PER_ELEMENT,
-	0,
-)
-gl.enableVertexAttribArray(attribLocations.a_Position)
-gl.vertexAttribPointer(
-	attribLocations.a_Color,
-	3,
-	gl.FLOAT,
-	0,
-	5*Float32Array.BYTES_PER_ELEMENT,
-	2*Float32Array.BYTES_PER_ELEMENT,
-)
-gl.enableVertexAttribArray(attribLocations.a_Color)
-// gl.disableVertexAttribArray(attribLocations.a_Position)
-// gl.disableVertexAttribArray(attribLocations.a_Color)
-
+preprocessingBind(1)
 
 // FOR POST PROCESSING
 // Data   SCREEN SIZE
@@ -96,37 +72,8 @@ let data2 = [
 ]
 
 // METHOD 2
-gl.bindBuffer(gl.ARRAY_BUFFER,dataBuffer)
-gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data2),gl.STATIC_DRAW)
-
 const data2Buffer = gl.createBuffer()
-gl.bindBuffer(gl.ARRAY_BUFFER,data2Buffer)
-gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data2),gl.STATIC_DRAW)
-
-// pointer
-gl.vertexAttribPointer(
-	attribLocations.a_Position,
-	2,
-	gl.FLOAT,
-	0,
-	4*Float32Array.BYTES_PER_ELEMENT,
-	0,
-)
-gl.enableVertexAttribArray(attribLocations.a_Position)
-gl.vertexAttribPointer(
-	attribLocations.a_TexCoord,
-	2,
-	gl.FLOAT,
-	0,
-	4*Float32Array.BYTES_PER_ELEMENT,
-	2*Float32Array.BYTES_PER_ELEMENT,
-)
-gl.enableVertexAttribArray(attribLocations.a_TexCoord)
-// gl.disableVertexAttribArray(attribLocations.a_Position)
-gl.disableVertexAttribArray(attribLocations.a_Color)
-
-
-
+postprocessingBind(1)
 
 
 // TEXTURES &
@@ -154,6 +101,62 @@ renderToCanvas()
 
 
 // FUNCTIONS
+function postprocessingBind(shouldBuffer=0){
+	gl.bindBuffer(gl.ARRAY_BUFFER,data2Buffer)
+	if(shouldBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data2),gl.STATIC_DRAW)
+
+	// pointer
+	gl.vertexAttribPointer(
+		attribLocations.a_Position,
+		2,
+		gl.FLOAT,
+		0,
+		4*Float32Array.BYTES_PER_ELEMENT,
+		0,
+	)
+	gl.vertexAttribPointer(
+		attribLocations.a_TexCoord,
+		2,
+		gl.FLOAT,
+		0,
+		4*Float32Array.BYTES_PER_ELEMENT,
+		2*Float32Array.BYTES_PER_ELEMENT,
+	)
+	gl.enableVertexAttribArray(attribLocations.a_Position)
+	gl.enableVertexAttribArray(attribLocations.a_TexCoord)
+	gl.disableVertexAttribArray(attribLocations.a_Color)	// IMPORTANT
+}
+
+function preprocessingBind(shouldBuffer=0){
+	gl.bindBuffer(gl.ARRAY_BUFFER,dataBuffer)
+	
+	if(shouldBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW)
+
+	// pointer
+	gl.vertexAttribPointer(
+		attribLocations.a_Position,
+		2,
+		gl.FLOAT,
+		0,
+		5*Float32Array.BYTES_PER_ELEMENT,
+		0,
+	)
+	gl.enableVertexAttribArray(attribLocations.a_Position)
+	gl.vertexAttribPointer(
+		attribLocations.a_Color,
+		3,
+		gl.FLOAT,
+		0,
+		5*Float32Array.BYTES_PER_ELEMENT,
+		2*Float32Array.BYTES_PER_ELEMENT,
+	)
+	gl.enableVertexAttribArray(attribLocations.a_Color)
+}
+
+
+
 function read(){
 	const readData = new Uint8Array(canvas.width*canvas.height*4)
 	gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,readData)
