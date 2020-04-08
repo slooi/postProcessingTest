@@ -88,7 +88,7 @@ updateTexture(textures[0],buildData())		// WRITE INTO THE TEXTURES[0]
 updateTexture(textures[1],buildData(1))
 
 gl.uniform1f(uniformLocations.u_RadInv,2/canvas.width)
-
+gl.uniform1f(uniformLocations.u_PixSize,1/canvas.width)
 // gl.bindFramebuffer(gl.FRAMEBUFFER,null)			// canvas
 // preprocessingBind(0)										// enable/disable
 // render(data.length/6)										// ONLY DRAW RECT ()
@@ -111,7 +111,7 @@ render(data.length/6)		// draw TRIANGLES (no texture)
 read()
 // gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA)
 
-gl.uniform1i(uniformLocations.u_RenderTex,true)
+gl.uniform1i(uniformLocations.u_RenderTex,true)			// IMPORTANT
 postprocessingBind(0)
 gl.bindFramebuffer(gl.FRAMEBUFFER,null)		// draw to Canvas
 gl.bindTexture(gl.TEXTURE_2D,textures[0])	// Use textures[0] 

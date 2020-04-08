@@ -10,6 +10,7 @@
 				image-rendering: -webkit-crisp-edges;
 				image-rendering: pixelated;
 				border: 1px dashed grey;
+				background-color: darkblue;
 			}
 
 		</style>
@@ -42,11 +43,22 @@
 
 			uniform sampler2D u_Tex;
 			uniform bool u_RenderTex;
+			uniform float u_PixSize;
 			
 			void main(){
 				vec4 c = texture2D(u_Tex,v_TexCoord);
 				if(u_RenderTex){
-					gl_FragColor = c;
+					vec4 tl = texture2D(u_Tex,vec2(v_TexCoord.x-u_PixSize,v_TexCoord.y+u_PixSize));
+					vec4 t = texture2D(u_Tex,vec2(v_TexCoord.x,v_TexCoord.y+u_PixSize));
+					vec4 tr = texture2D(u_Tex,vec2(v_TexCoord.x+u_PixSize,v_TexCoord.y+u_PixSize));
+					vec4 r = texture2D(u_Tex,vec2(v_TexCoord.x+u_PixSize,v_TexCoord.y));
+					vec4 br = texture2D(u_Tex,vec2(v_TexCoord.x+u_PixSize,v_TexCoord.y-u_PixSize));
+					vec4 b = texture2D(u_Tex,vec2(v_TexCoord.x,v_TexCoord.y-u_PixSize));
+					vec4 bl = texture2D(u_Tex,vec2(v_TexCoord.x-u_PixSize,v_TexCoord.y-u_PixSize));
+					vec4 l = texture2D(u_Tex,vec2(v_TexCoord.x-u_PixSize,v_TexCoord.y));
+					
+					gl_FragColor = 1.1*(c+tl+t+tr+r+br+b+bl+l)/9.0;
+					//gl_FragColor = c;
 				}else{
 					gl_FragColor = v_Color+c;
 				}
