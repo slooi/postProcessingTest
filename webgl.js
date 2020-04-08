@@ -8,7 +8,7 @@ const fsSource = document.getElementById('fsSource').innerText
 
 // canvas
 const canvas = document.createElement('canvas')
-canvas.width = 10
+canvas.width = 2
 canvas.height = canvas.width
 document.body.append(canvas)
 
@@ -21,8 +21,7 @@ if(!gl){
 }
 
 gl.viewport(0,0,canvas.width,canvas.height)
-gl.clearColor(0.5,0.4,0.7,1)
-gl.clear(gl.COLOR_BUFFER_BIT)
+clear()
 
 // program
 const program = buildProgram()
@@ -89,25 +88,48 @@ updateTexture(textures[0],buildData())		// WRITE INTO THE TEXTURES[0]
 gl.uniform1f(uniformLocations.u_RadInv,2/canvas.width)
 
 
-// gl.blendFunc(gl.ONE,gl.ONE)
+gl.blendFunc(gl.ONE,gl.ONE)
 
 preprocessingBind(0)
 // setTexFramePair(pairCounter)
 // pairCounter++
 // pairCounter=pairCounter%2
-gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[1])
-gl.bindTexture(gl.TEXTURE_2D,textures[0])
+
+// gl.clear(gl.COLOR_BUFFER_BIT)
+gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])	// WRITE INTO TEXTURES[0]
+// clear()
+
+gl.bindTexture(gl.TEXTURE_2D,textures[1])	// 
 render()
 read()
-
-gl.bindTexture(gl.TEXTURE_2D,textures[1])
+gl.bindTexture(gl.TEXTURE_2D,textures[0])
 postprocessingBind(0)
 // preprocessingBind(0)
 renderToCanvas()
 read()
 
 
+/* WORKS */
+/* 
+
+gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])
+gl.bindTexture(gl.TEXTURE_2D,textures[1])
+render()
+read()
+
+gl.bindTexture(gl.TEXTURE_2D,textures[0])
+postprocessingBind(0)
+// preprocessingBind(0)
+renderToCanvas()
+read()
+*/
+
 // FUNCTIONS
+function clear(){
+	gl.clearColor(0.5,0.4,0.7,1)
+	gl.clear(gl.COLOR_BUFFER_BIT)
+}
+
 function postprocessingBind(shouldBuffer=0){
 	gl.bindBuffer(gl.ARRAY_BUFFER,data2Buffer)
 	if(shouldBuffer)
@@ -191,6 +213,9 @@ function buildData(){
 	const data = new Uint8Array(canvas.width*canvas.height*4)
 	const row = canvas.height-1
 	const col = 0
+	// for(let i=0;i<canvas.width*canvas.height*4;i++){
+	// 	data[i] = 0
+	// }
 	data[row*canvas.width*4 + col*4]		=	255
 	data[row*canvas.width*4 + col*4+1]	=	0
 	data[row*canvas.width*4 + col*4+2]	=	0
