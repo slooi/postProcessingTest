@@ -41,10 +41,15 @@
 			varying vec2 v_TexCoord;
 
 			uniform sampler2D u_Tex;
+			uniform bool u_RenderTex;
 			
 			void main(){
 				vec4 c = texture2D(u_Tex,v_TexCoord);
-				gl_FragColor = v_Color+c;
+				if(u_RenderTex){
+					gl_FragColor = c;
+				}else{
+					gl_FragColor = v_Color+c;
+				}
 			}
 		</script>
 		<script src="webgl.js"></script>

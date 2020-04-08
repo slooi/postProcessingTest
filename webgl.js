@@ -12,7 +12,7 @@ canvas.width = 20
 canvas.height = canvas.width
 document.body.append(canvas)
 
-let gl = canvas.getContext('webgl',{antialias:false})
+let gl = canvas.getContext('webgl',{antialias:false})//premultipliedAlpha:false,alpha:false
 if(!gl){
 	gl = canvas.getContext('experimental-webgl')
 }
@@ -53,7 +53,6 @@ let data = [
 	1,0,1,1,0,1,
 	1,1,1,1,1,1,
 ]
-
 // ORIGINAL DATA
 // Buffer
 const dataBuffer = gl.createBuffer()
@@ -76,6 +75,8 @@ postprocessingBind(1)
 
 
 // TEXTURES &
+
+
 const textures = []
 const fbs = []
 
@@ -84,22 +85,45 @@ for(let i=0;i<2;i++){
 	fbs[i] = buildFramebuffer(textures[i])
 }
 updateTexture(textures[0],buildData())		// WRITE INTO THE TEXTURES[0]
+updateTexture(textures[1],buildData(1))
 
 gl.uniform1f(uniformLocations.u_RadInv,2/canvas.width)
 
+// gl.bindFramebuffer(gl.FRAMEBUFFER,null)			// canvas
+// preprocessingBind(0)										// enable/disable
+// render(data.length/6)										// ONLY DRAW RECT ()
+// read()
 
-gl.bindFramebuffer(gl.FRAMEBUFFER,null)			// canvas
-preprocessingBind(0)										// enable/disable
-render(data.length/6)										// ONLY DRAW RECT ()
+// // Render red pixel from texture onto canvas
+// postprocessingBind(0)										// Bind pos, TEXCOORDS
+// gl.bindTexture(gl.TEXTURE_2D,textures[0])		//select textures[0]
+// render(data.length/4)
+// read()
+// // setTexFramePair(pairCounter)
+// // pairCounter++
+// // pairCounter=pairCounter%2
+
+gl.uniform1i(uniformLocations.u_RenderTex,false)
+preprocessingBind(0)											// enable
+gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])	// draw to textures[0]
+gl.bindTexture(gl.TEXTURE_2D,textures[1])	// prevent feedback LOOP
+render(data.length/6)		// draw TRIANGLES (no texture)
+read()
+// gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA)
+
+gl.uniform1i(uniformLocations.u_RenderTex,true)
+postprocessingBind(0)
+gl.bindFramebuffer(gl.FRAMEBUFFER,null)		// draw to Canvas
+gl.bindTexture(gl.TEXTURE_2D,textures[0])	// Use textures[0] 
+render(data2.length/4)	//
 read()
 
-postprocessingBind(0)										// Bind pos, TEXCOORDS
-gl.bindTexture(gl.TEXTURE_2D,textures[0])		//select textures[0]
-render(data.length/4)
-read()
-// setTexFramePair(pairCounter)
-// pairCounter++
-// pairCounter=pairCounter%2
+
+// NOTES:
+// textures[0] DID NOT get 255 Alpha after triangle and red dot became one.
+// Only after postprocessingBind can the red dot be created?
+// FALSE, Can render ONTO the texture
+// If rendering a texture onto something, ALPHA will be 255?
 
 // // gl.clear(gl.COLOR_BUFFER_BIT)
 // gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])	// WRITE INTO TEXTURES[0]
@@ -216,7 +240,7 @@ function renderToCanvas(len){
 	gl.drawArrays(gl.TRIANGLES,0,len)
 }
 
-function buildData(){
+function buildData(completelyNull=0){
 	const data = new Uint8Array(canvas.width*canvas.height*4)
 	const row = canvas.height-1
 	const col = 0
@@ -226,10 +250,12 @@ function buildData(){
 		data[i+2]	=	0
 		data[i+3]	=	0
 	}
-	data[row*canvas.width*4 + col*4]		=	255
-	data[row*canvas.width*4 + col*4+1]	=	0
-	data[row*canvas.width*4 + col*4+2]	=	0
-	data[row*canvas.width*4 + col*4+3]	=	255
+	if(!completelyNull){
+		data[row*canvas.width*4 + col*4]		=	255
+		data[row*canvas.width*4 + col*4+1]	=	0
+		data[row*canvas.width*4 + col*4+2]	=	0
+		data[row*canvas.width*4 + col*4+3]	=	255
+	}
 	return data
 }
 
