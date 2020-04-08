@@ -8,7 +8,7 @@ const fsSource = document.getElementById('fsSource').innerText
 
 // canvas
 const canvas = document.createElement('canvas')
-canvas.width = 2
+canvas.width = 20
 canvas.height = canvas.width
 document.body.append(canvas)
 
@@ -46,12 +46,12 @@ for(let i=0;i<gl.getProgramParameter(program,gl.ACTIVE_UNIFORMS);i++){
 
 // Data  ORIGINAL
 let data = [
-	0,0,1,1,1,
-	1,0,1,1,0,
-	0,1,1,0,1,
-	0,0,1,1,1,
-	1,0,1,1,0,
-	1,1,1,1,1,
+	0,0,1,1,1,1,
+	1,0,1,1,0,1,
+	0,1,1,0,1,1,
+	0,0,1,1,1,1,
+	1,0,1,1,0,1,
+	1,1,1,1,1,1,
 ]
 
 // ORIGINAL DATA
@@ -88,25 +88,32 @@ updateTexture(textures[0],buildData())		// WRITE INTO THE TEXTURES[0]
 gl.uniform1f(uniformLocations.u_RadInv,2/canvas.width)
 
 
-gl.blendFunc(gl.ONE,gl.ONE)
+gl.bindFramebuffer(gl.FRAMEBUFFER,null)			// canvas
+preprocessingBind(0)										// enable/disable
+render(data.length/6)										// ONLY DRAW RECT ()
+read()
 
-preprocessingBind(0)
+postprocessingBind(0)										// Bind pos, TEXCOORDS
+gl.bindTexture(gl.TEXTURE_2D,textures[0])		//select textures[0]
+render(data.length/4)
+read()
 // setTexFramePair(pairCounter)
 // pairCounter++
 // pairCounter=pairCounter%2
 
-// gl.clear(gl.COLOR_BUFFER_BIT)
-gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])	// WRITE INTO TEXTURES[0]
-// clear()
+// // gl.clear(gl.COLOR_BUFFER_BIT)
+// gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[0])	// WRITE INTO TEXTURES[0]
+// // clear()
+// // gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA)
 
-gl.bindTexture(gl.TEXTURE_2D,textures[1])	// 
-render()
-read()
-gl.bindTexture(gl.TEXTURE_2D,textures[0])
-postprocessingBind(0)
-// preprocessingBind(0)
-renderToCanvas()
-read()
+// gl.bindTexture(gl.TEXTURE_2D,textures[1])	// PREVENTS FEEDBACK LOOP
+// render(data.length/5)
+// read()
+// // gl.bindTexture(gl.TEXTURE_2D,textures[0])
+// // postprocessingBind(0)
+// // // preprocessingBind(0)
+// // renderToCanvas(data2.length/4)
+// // read()
 
 
 /* WORKS */
@@ -169,18 +176,18 @@ function preprocessingBind(shouldBuffer=0){
 		2,
 		gl.FLOAT,
 		0,
-		5*Float32Array.BYTES_PER_ELEMENT,
+		6*Float32Array.BYTES_PER_ELEMENT,
 		0,
 	)
-	gl.enableVertexAttribArray(attribLocations.a_Position)
 	gl.vertexAttribPointer(
 		attribLocations.a_Color,
-		3,
+		4,
 		gl.FLOAT,
 		0,
-		5*Float32Array.BYTES_PER_ELEMENT,
+		6*Float32Array.BYTES_PER_ELEMENT,
 		2*Float32Array.BYTES_PER_ELEMENT,
 	)
+	gl.enableVertexAttribArray(attribLocations.a_Position)
 	gl.enableVertexAttribArray(attribLocations.a_Color)
 	gl.disableVertexAttribArray(attribLocations.a_TexCoord)
 }
@@ -199,23 +206,26 @@ function updateTexture(tex,data){
 	gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,canvas.width,canvas.height,0,gl.RGBA,gl.UNSIGNED_BYTE,data)
 }
 
-function render(){
-	gl.drawArrays(gl.TRIANGLES,0,data.length/5)
+function render(len){
+	gl.drawArrays(gl.TRIANGLES,0,len)
 }
 
-function renderToCanvas(){
+function renderToCanvas(len){
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	// gl.drawArrays(gl.POINTS,0,data.length/5)
-	gl.drawArrays(gl.TRIANGLES,0,data.length/5)
+	gl.drawArrays(gl.TRIANGLES,0,len)
 }
 
 function buildData(){
 	const data = new Uint8Array(canvas.width*canvas.height*4)
 	const row = canvas.height-1
 	const col = 0
-	// for(let i=0;i<canvas.width*canvas.height*4;i++){
-	// 	data[i] = 0
-	// }
+	for(let i=0;i<canvas.width*canvas.height*4;i+=4){
+		data[i]		=	0
+		data[i+1]	=	0
+		data[i+2]	=	0
+		data[i+3]	=	0
+	}
 	data[row*canvas.width*4 + col*4]		=	255
 	data[row*canvas.width*4 + col*4+1]	=	0
 	data[row*canvas.width*4 + col*4+2]	=	0
