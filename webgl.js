@@ -8,7 +8,7 @@ const fsSource = document.getElementById('fsSource').innerText
 
 // canvas
 const canvas = document.createElement('canvas')
-canvas.width = 8
+canvas.width = 10
 canvas.height = canvas.width
 document.body.append(canvas)
 
@@ -84,20 +84,27 @@ for(let i=0;i<2;i++){
 	textures[i] = buildTexture(null)
 	fbs[i] = buildFramebuffer(textures[i])
 }
-updateTexture(textures[0],buildData())
+updateTexture(textures[0],buildData())		// WRITE INTO THE TEXTURES[0]
 
 gl.uniform1f(uniformLocations.u_RadInv,2/canvas.width)
 
 
-// gl.blendFunc(gl.ONE,gl.ZERO)
+// gl.blendFunc(gl.ONE,gl.ONE)
 
-setTexFramePair(pairCounter)
-pairCounter++
-pairCounter=pairCounter%2
+preprocessingBind(0)
+// setTexFramePair(pairCounter)
+// pairCounter++
+// pairCounter=pairCounter%2
+gl.bindFramebuffer(gl.FRAMEBUFFER,fbs[1])
+gl.bindTexture(gl.TEXTURE_2D,textures[0])
 render()
 read()
 
+gl.bindTexture(gl.TEXTURE_2D,textures[1])
+postprocessingBind(0)
+// preprocessingBind(0)
 renderToCanvas()
+read()
 
 
 // FUNCTIONS
@@ -153,6 +160,7 @@ function preprocessingBind(shouldBuffer=0){
 		2*Float32Array.BYTES_PER_ELEMENT,
 	)
 	gl.enableVertexAttribArray(attribLocations.a_Color)
+	gl.disableVertexAttribArray(attribLocations.a_TexCoord)
 }
 
 
