@@ -1,3 +1,6 @@
 # postProcessingTest
 Testing how to do postProcessing
-https://imgur.com/a/tVkbIQs
+
+<p align="center">
+	<img src="https://imgur.com/a/tVkbIQs">
+</p>
